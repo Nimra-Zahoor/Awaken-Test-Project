@@ -5,7 +5,13 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from 'firebase/auth';
 
 import FacebookIcon from '../../../assets/svgs/facebook-icon.svg';
 import GoogleIcon from '../../../assets/svgs/google-icon.svg';
@@ -15,25 +21,63 @@ import OpenEye from '../../../assets/svgs/open-eye.svg';
 import GradientButton from '../../components/CustomButton/GradientButton';
 import AppBar from '../../components/Appbar/AppBar';
 import SocialMediaButton from '../../components/CustomButton/SocialMediaButton';
+import {collection, addDoc, getDocs} from 'firebase/firestore';
 
 import {styles} from './styles';
 import CustomInput from '../../components/CustomInput/CustomInput';
 import {useNavigation} from '@react-navigation/native';
+import {FIREBASE_DB} from '../../services/firebase/firebaseConfig';
 
 const Signup = () => {
   const navigation = useNavigation();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const auth = getAuth();
   const [secureTextEntry, setSecureTextEntry] = useState(true);
+  const handleSignUp = () => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(userCredential => {
+        const user = userCredential.user;
+        updateProfile(auth.currentUser, {
+          displayName: username,
+        })
+          .then(() => {
+            Alert.alert('Success', 'User account created successfully!');
+            const querySnapshot = getDocs(collection(FIREBASE_DB, 'users'));
+            querySnapshot.forEach(doc => {
+              console.log(`${doc.id} => ${doc.data()}`);
+            });
+            navigation.navigate('login');
+          })
+          .catch(error => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            Alert.alert(`Error ${errorCode}`, errorMessage);
+          });
+        const docRef = addDoc(collection(FIREBASE_DB, 'users'), {
+          name: username,
+          email: email,
+          password: password,
+        });
+        console.log('Document written with ID: ', docRef.id);
+      })
+      .catch(error => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        Alert.alert(`Error ${errorCode}`, errorMessage);
+      });
+  };
 
   const toggleSecureTextEntry = () => {
     setSecureTextEntry(prev => !prev);
   };
+
   const validateEmail = email => {
     const re = /\S+@\S+\.\S+/;
     return re.test(email);
   };
+
   return (
     <>
       <AppBar />
@@ -83,12 +127,12 @@ const Signup = () => {
           />
           <View style={styles.checkboxContainer}>
             <Text style={styles.checkboxText}>
-              i have read the{' '}
+              I have read the{' '}
               <Text style={styles.linkText}> Privacy Policy</Text>
             </Text>
           </View>
           <GradientButton
-            onPress={() => {}}
+            onPress={handleSignUp}
             colors={['#DD3DFB', '#6C09DB']}
             text="SIGN UP"
           />

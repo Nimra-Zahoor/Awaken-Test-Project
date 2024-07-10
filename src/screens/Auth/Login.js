@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
   KeyboardAvoidingView,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 
 import FacebookIcon from '../../../assets/svgs/facebook-icon.svg';
@@ -16,9 +17,28 @@ import SocialMediaButton from '../../components/CustomButton/SocialMediaButton';
 import {styles} from './styles';
 import CustomInput from '../../components/CustomInput/CustomInput';
 import {useNavigation} from '@react-navigation/native';
+import {getAuth, signInWithEmailAndPassword} from 'firebase/auth';
 
 const Login = () => {
   const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const auth = getAuth();
+  const handleLogin = () => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then(userCredential => {
+        const user = userCredential.user;
+        Alert.alert(
+          `Hello Success ${user.displayName || ''}`,
+          'Sign in successfully!',
+        );
+      })
+      .catch(error => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        Alert.alert(`Error ${errorCode}`, `${errorMessage}`);
+      });
+  };
   return (
     <>
       <AppBar />
@@ -43,12 +63,19 @@ const Login = () => {
           />
           <Text style={styles.orText}>OR LOG IN WITH EMAIL</Text>
           <CustomInput
-            placeholder="Email address"
+            placeholder="Email"
             keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
           />
-          <CustomInput placeholder="Password" secureTextEntry />
+          <CustomInput
+            placeholder="Password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
           <GradientButton
-            onPress={() => {}}
+            onPress={handleLogin}
             colors={['#DD3DFB', '#6C09DB']}
             text="LOG IN"
           />
