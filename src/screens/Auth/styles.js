@@ -103,7 +103,7 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   footerText: {
-    flex: 1,
+    display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',

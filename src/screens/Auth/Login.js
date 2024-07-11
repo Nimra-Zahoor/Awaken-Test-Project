@@ -82,12 +82,13 @@ const Login = () => {
           />
           <Text style={styles.forgotText}>Forgot Password?</Text>
         </ScrollView>
-        <TouchableOpacity onPress={() => navigation.navigate('signup')}>
-          <Text style={styles.footerText}>
-            ALREADY HAVE AN ACCOUNT?{' '}
+
+        <Text style={styles.footerText}>
+          ALREADY HAVE AN ACCOUNT?{' '}
+          <TouchableOpacity onPress={() => navigation.navigate('signup')}>
             <Text style={styles.linkText}>SIGN UP</Text>
-          </Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </Text>
       </KeyboardAvoidingView>
     </>
   );
