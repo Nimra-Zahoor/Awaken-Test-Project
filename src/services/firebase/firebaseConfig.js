@@ -1,8 +1,9 @@
-import {initializeApp} from 'firebase/app';
 import {getAuth} from 'firebase/auth';
-import {getFirestore} from 'firebase/firestore';
+import firebase from 'firebase/compat/app';
+import {getFirestore, initializeFirestore} from 'firebase/firestore';
+import 'firebase/compat/firestore';
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: 'AIzaSyD1fnDu9dgXarxKARhTLYZRanbobpJBMtw',
   authDomain: 'awaken-1bf1c.firebaseapp.com',
   projectId: 'awaken-1bf1c',
@@ -11,9 +12,23 @@ const firebaseConfig = {
   appId: '1:619212754803:web:db8ec03b0126c18b9d3f06',
   measurementId: 'G-C0TEGMN2EY',
 };
+let app;
 
-const FIREBASE_APP = initializeApp(firebaseConfig);
-const FIREBASE_AUTH = getAuth(FIREBASE_APP);
-const FIREBASE_DB = getFirestore(FIREBASE_APP);
+if (firebase.apps.length === 0) {
+  app = firebase.initializeApp(firebaseConfig);
+} else {
+  app = firebase.app();
+}
 
-export {FIREBASE_AUTH, FIREBASE_DB};
+initializeFirestore(app, {
+  useFetchStraems: false,
+  experimentalForceLongPolling: true,
+  merge: true,
+});
+
+const firestore = getFirestore(app);
+const db = app.firestore();
+
+const auth = getAuth(app);
+
+export {auth, db, firestore};

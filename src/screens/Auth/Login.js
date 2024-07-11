@@ -17,27 +17,27 @@ import SocialMediaButton from '../../components/CustomButton/SocialMediaButton';
 import {styles} from './styles';
 import CustomInput from '../../components/CustomInput/CustomInput';
 import {useNavigation} from '@react-navigation/native';
-import {getAuth, signInWithEmailAndPassword} from 'firebase/auth';
+import {login} from '../../api/auth';
 
 const Login = () => {
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const auth = getAuth();
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then(userCredential => {
-        const user = userCredential.user;
-        Alert.alert(
-          `Hello Success ${user.displayName || ''}`,
-          'Sign in successfully!',
-        );
-      })
-      .catch(error => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        Alert.alert(`Error ${errorCode}`, `${errorMessage}`);
-      });
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      const credentials = {
+        email: email,
+        password: password,
+      };
+      await login(credentials);
+      Alert.alert('Sucess', 'Login Successfully');
+    } catch (error) {
+      Alert.alert('Login error', `${error}`);
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <>
@@ -75,8 +75,9 @@ const Login = () => {
             onChangeText={setPassword}
           />
           <GradientButton
+            disabled={loading}
             onPress={handleLogin}
-            colors={['#DD3DFB', '#6C09DB']}
+            colors={loading ? ['grey', 'grey'] : ['#DD3DFB', '#6C09DB']}
             text="LOG IN"
           />
           <Text style={styles.forgotText}>Forgot Password?</Text>

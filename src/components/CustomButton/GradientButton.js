@@ -3,9 +3,12 @@ import {TouchableOpacity, Text} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {styles} from './style';
 
-const GradientButton = ({onPress, colors, text}) => {
+const GradientButton = ({onPress, colors, text, disabled}) => {
   return (
-    <TouchableOpacity style={styles.signupButton} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.signupButton}
+      onPress={onPress}
+      disabled={disabled}>
       <LinearGradient
         colors={colors}
         style={styles.gradient}

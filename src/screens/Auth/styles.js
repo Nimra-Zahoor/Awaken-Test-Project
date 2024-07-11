@@ -103,6 +103,9 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   footerText: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     textAlign: 'center',
     color: '#A1A4B2',
     paddingBottom: hp('10%'),

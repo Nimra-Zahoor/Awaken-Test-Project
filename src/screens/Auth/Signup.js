@@ -6,67 +6,52 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  updateProfile,
-} from 'firebase/auth';
 
 import FacebookIcon from '../../../assets/svgs/facebook-icon.svg';
 import GoogleIcon from '../../../assets/svgs/google-icon.svg';
 import GreenTick from '../../../assets/svgs/green-tick.svg';
 import ClosedEye from '../../../assets/svgs/closed-eye.svg';
 import OpenEye from '../../../assets/svgs/open-eye.svg';
-import GradientButton from '../../components/CustomButton/GradientButton';
 import AppBar from '../../components/Appbar/AppBar';
 import SocialMediaButton from '../../components/CustomButton/SocialMediaButton';
-import {collection, addDoc, getDocs} from 'firebase/firestore';
 
 import {styles} from './styles';
 import CustomInput from '../../components/CustomInput/CustomInput';
 import {useNavigation} from '@react-navigation/native';
-import {FIREBASE_DB} from '../../services/firebase/firebaseConfig';
+import {signup} from '../../api/auth';
+import GradientButton from '../../components/CustomButton/GradientButton';
 
 const Signup = () => {
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const auth = getAuth();
   const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const handleSignUp = () => {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(userCredential => {
-        const user = userCredential.user;
-        updateProfile(auth.currentUser, {
-          displayName: username,
-        })
-          .then(() => {
-            Alert.alert('Success', 'User account created successfully!');
-            const querySnapshot = getDocs(collection(FIREBASE_DB, 'users'));
-            querySnapshot.forEach(doc => {
-              console.log(`${doc.id} => ${doc.data()}`);
-            });
-            navigation.navigate('login');
-          })
-          .catch(error => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            Alert.alert(`Error ${errorCode}`, errorMessage);
-          });
-        const docRef = addDoc(collection(FIREBASE_DB, 'users'), {
+  const handleSignUp = async () => {
+    if (email && password !== '') {
+      try {
+        setLoading(true);
+        const data = {
           name: username,
           email: email,
           password: password,
-        });
-        console.log('Document written with ID: ', docRef.id);
-      })
-      .catch(error => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        Alert.alert(`Error ${errorCode}`, errorMessage);
-      });
+        };
+        await signup(data);
+        navigation.navigate('login');
+        setEmail('');
+        setPassword('');
+        setUsername('');
+      } catch (error) {
+        Alert.alert('Signup error', `${error}`);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      Alert.alert('Empty', 'Fill all fields');
+    }
   };
 
   const toggleSecureTextEntry = () => {
@@ -133,8 +118,9 @@ const Signup = () => {
           </View>
           <GradientButton
             onPress={handleSignUp}
-            colors={['#DD3DFB', '#6C09DB']}
+            colors={loading ? ['grey', 'grey'] : ['#DD3DFB', '#6C09DB']}
             text="SIGN UP"
+            disabled={loading}
           />
           <Text style={styles.footerText}>
             ALREADY HAVE AN ACCOUNT?{'  '}
